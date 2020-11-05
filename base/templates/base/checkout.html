@@ -1,0 +1,152 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+
+<div style="padding-top: 120px; padding-bottom:120px;" class="container ">
+	
+	
+	<div class="row">
+		<aside class="col-sm-4">
+
+	
+	
+	<div style="border: none" class="card">
+		<article class="card-group-item">
+			<header style="background-color: #415094 !important;" class="card-header">
+				<h6 style="color: white;" class="title">Lessons </h6>
+			</header>
+			<div class="filter-content">
+				<div class="card-body">
+					{% for lesson in product.lessons %}
+					<li><a style="color: #415094;" href="{{ lesson.slug }}">{{lesson.position}}. {{ lesson.title }} 		
+					</a></li>
+		
+
+					<hr style="border: 1px solid #41509456;">
+					
+					{% endfor %}
+				
+	
+				</div> <!-- card-body.// -->
+			</div>
+		</article> <!-- card-group-item.// -->
+		
+
+	</div> <!-- card.// -->
+	
+	
+	
+	
+		</aside> <!-- col.// -->
+		<aside class="col-sm-8">
+		
+			
+			<div style="max-width: 69rem; border:none;" class="card">
+				<article class="card-group-item">
+					<header style="background-color: #415094 !important;"  class="card-header"><h6 style="color: white;"  class="title">Course </h6></header>
+					
+						
+						<img style="border-radius:0px 0px 10px 10px !important;" class="card-img-top" 
+						src="{{ product.cover_image.url }}" alt="Card image cap">
+						<div class="card-body">
+						  <h5 class="card-title">{{product.title}}</h5>
+						  {% if product.free %}
+						  <span>Free</span>
+						  {% else %}
+						  <span>${{product.price}}</span>
+						  {% endif %}
+						  <p class="card-text">{{product.description | truncatechars:113}}</p>
+						 
+						</div>
+					
+						{% if request.user in product.students.all %}
+		<!--<a  target="_blank" class="btn btn-sm btn-warning ml-5 mb-5" href="{% url 'share' product.id  %}">Share</a>-->	
+					{% else %}
+					<div id="paypal-button-container"></div>
+			{% endif %}
+					
+				</article> <!-- card-group-item.// -->
+				
+			</div><!-- card.// -->
+			
+			
+			
+				</aside> <!-- col.// -->
+
+		
+	</div> <!-- row.// -->
+	
+	</div> 
+	<!--container end.//-->
+	
+
+
+
+	 <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+
+	 <script>
+
+	 	function getCookie(name) {
+		    var cookieValue = null;
+		    if (document.cookie && document.cookie !== '') {
+		        var cookies = document.cookie.split(';');
+		        for (var i = 0; i < cookies.length; i++) {
+		            var cookie = cookies[i].trim();
+		            // Does this cookie string begin with the name we want?
+		            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		                break;
+		            }
+		        }
+		    }
+		    return cookieValue;
+		}
+		var csrftoken = getCookie('csrftoken');
+
+	 	var total = '{{product.price}}'
+	 	var productId = '{{product.id}}'
+
+	 	function completeOrder(){
+	 		var url = "{% url 'complete' %}"
+
+	 		fetch(url, {
+	 			method:'POST',
+	 			headers:{
+	 				'Content-type':'application/json',
+	 				'X-CSRFToken':csrftoken,
+	 			},
+	 			body:JSON.stringify({'productId':productId})
+	 		})
+	 	}
+
+
+        // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
+
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{ 
+                        amount: {
+                            value: total
+                        }
+                    }]
+                });
+            },
+
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Show a success message to the buyer
+                    completeOrder()
+					alert('Transaction completed by ' + details.payer.name.given_name + '!');
+					window.location.assign("/")
+                });
+            }
+
+
+        }).render('#paypal-button-container');
+    </script>
+
+{% endblock content %}

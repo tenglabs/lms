@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+{% if request.user in course.students.all  %}
+
+<div style="padding-top: 150px;" class='container'>
+	<h1> {{lesson.position}}. {{ lesson.title }}</h1>
+	
+		
+			
+		
+			
+			<div class="container">
+				{{lesson.content|safe}}
+
+		</div>
+
+</div>
+{% else %}
+{% if course.free %}
+<div style="padding-top: 150px;" class='container'>
+	<h1> {{lesson.position}}. {{ lesson.title }}</h1>
+	
+		
+			
+		
+			
+			<div class="container">
+				{{lesson.content|safe}}
+
+		</div>
+
+</div>
+{% else %}
+<h1 style="margin-top: 150px;">Access Denied</h1>
+{% endif %}
+
+{% endif %}
+
+{% endblock content %}
